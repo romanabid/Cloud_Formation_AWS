@@ -1,0 +1,163 @@
+Resources:
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: myVPC
+        
+# Create an Internet Gateway 
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyInternetGateway
+
+# Attach the Internet Gateway to the VPC
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref myVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+# Create a public subnet1
+  publicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.1.0/24
+      # MappublicIpOnLaunch: false
+      AvailabilityZone: ap-southeast-2a
+      Tags:
+        - Key: Name
+          Value: publicSubnet1
+# Create a public subnet2
+  publicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.2.0/24
+      # MappublicIpOnLaunch: false
+      AvailabilityZone: ap-southeast-2b
+      Tags:
+        - Key: Name
+          Value: publicSubnet2        
+
+# Create a Private Subnet
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: ap-southeast-2a
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet1
+
+# Create a Private Subnet2
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref myVPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: ap-southeast-2b
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet2
+
+# Create a public route table
+  publicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: Name
+          Value: publicRouteTable
+
+# Create a Route to the Internet Gateway in the public Route Table
+  publicRoute: 
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref publicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway
+
+# Associate the public Route Table with public Subnet 1
+  publicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref publicSubnet1
+      RouteTableId: !Ref publicRouteTable
+
+# Associate the public Route Table with public Subnet 1
+  publicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref publicSubnet2
+      RouteTableId: !Ref publicRouteTable
+
+#  Create a Private Route Table for Private Subnet 1
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable1
+
+#  Create a Private Route Table for Private Subnet 2
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable2
+
+# Assocaite the private Route table with private subnet 1
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+
+# Assocaite the private Route table with private subnet 2
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable2     
+
+Outputs:
+  VpcId:
+    Description: The ID of the vpc
+    Value: !Ref myVPC
+  PublicSubnet1Id:
+    Description: The ID of the first public subnet
+    Value: !Ref publicSubnet1
+  PublicSubnet2Id:
+    Description: The ID of the second public subnet
+    Value: !Ref publicSubnet2
+  PrivateSubnet1Id:
+    Description: The ID of the first private subnet
+    Value: !Ref PrivateSubnet1
+  PrivateSubnet2Id:
+    Description: The ID of the second private subnet
+    Value: !Ref PrivateSubnet2
+  InternetGatewayId:
+    Description: The ID of the Internet gateway
+    Value: !Ref MyInternetGateway
+  PublicRouteTableId:
+    Description: The ID of the public route table
+    Value: !Ref publicRouteTable
+  PrivateRouteTable1Id:
+    Description: The ID of the Private route table 1
+    Value: !Ref PrivateRouteTable1
+  PrivateRouteTable2Id:
+    Description: The ID of the private route table 2
+    Value: !Ref PrivateRouteTable2
+
